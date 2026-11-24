@@ -9,8 +9,10 @@ CREATE TABLE IF NOT EXISTS 空窗策略戳 (
   跨越区间 TEXT NOT NULL DEFAULT '',
   窗键清单 TEXT NOT NULL DEFAULT '[]',
   戳号 TEXT NOT NULL DEFAULT '',
-  时刻 TEXT NOT NULL DEFAULT ''
+  时刻 TEXT NOT NULL DEFAULT '',
+  世代 INTEGER NOT NULL DEFAULT 1
 );
+CREATE INDEX IF NOT EXISTS idx_空窗策略戳_区间 ON 空窗策略戳(跨越区间);
 
 CREATE TABLE IF NOT EXISTS 站规 (
   键 TEXT PRIMARY KEY,
@@ -102,14 +104,21 @@ CREATE TABLE IF NOT EXISTS 空窗策略履历 (
 迁移列 = [
     ("热度窗", "空窗", "INTEGER NOT NULL DEFAULT 0"),
     ("热度窗", "空窗策略快照", "TEXT NOT NULL DEFAULT ''"),
+    ("空窗策略戳", "世代", "INTEGER NOT NULL DEFAULT 1"),
 ]
 
 
 def _迁移(conn) -> None:
-    既有列 = {r["name"] for r in conn.execute("PRAGMA table_info(热度窗)")}
+    表列缓存: dict[str, set] = {}
     for 表, 列, 声明 in 迁移列:
-        if 列 not in 既有列:
+        if 表 not in 表列缓存:
+            表列缓存[表] = {r["name"] for r in conn.execute(f"PRAGMA table_info({表})")}
+        if 列 not in 表列缓存[表]:
             conn.execute(f"ALTER TABLE {表} ADD COLUMN {列} {声明}")
+            表列缓存[表].add(列)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_空窗策略戳_区间 ON 空窗策略戳(跨越区间)"
+    )
 
 
 def 此刻() -> str:

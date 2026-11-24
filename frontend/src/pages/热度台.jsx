@@ -22,6 +22,15 @@ export default function 热度台() {
         <div className="阶"><div className="序">④ 撤回</div><b>{数.撤回单数 ?? 数.撤回单 ?? 0}</b><span>迟到修正</span></div>
         <div className="阶"><div className="序">⑤ 旁路</div><b>{数.旁路匣 ?? 0}</b><span>超允许迟到</span></div>
       </div>
+      <div className="行" style={{ gap: "0.7rem", marginBottom: "1rem" }}>
+        <Link to="/空窗策略戳">
+          空窗策略戳 <b>{数.策略戳数 ?? 0}</b>
+        </Link>
+        <span className={`徽章 ${数.策略戳核证 ? "通" : "败"}`}>
+          戳核证 {数.策略戳核证 ? "对齐" : "撕裂"}
+        </span>
+        <span className="讯" style={{ margin: 0 }}>覆盖窗键 {数.策略戳覆盖窗键 ?? 0}</span>
+      </div>
       <div className="提示条">
         冒烟顺序：<Link to="/事件流">事件流</Link> 依次推三份样例 → 看水位线 / 热度窗 / 撤回单 / 旁路匣 →{" "}
         <Link to="/窗互证">窗互证</Link>。

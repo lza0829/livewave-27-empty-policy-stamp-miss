@@ -28,7 +28,7 @@ export default function 热度窗页() {
           <thead>
             <tr>
               <th>窗键</th><th>房间</th><th>窗起</th><th>窗止</th><th>状态</th>
-              <th>点赞合计</th><th>送礼合计</th><th>笔数</th><th>空窗</th><th>版本</th><th>关闭处理时</th>
+              <th>点赞合计</th><th>送礼合计</th><th>笔数</th><th>空窗</th><th>版本</th><th>关闭处理时</th><th>策略戳</th>
             </tr>
           </thead>
           <tbody>
@@ -41,6 +41,7 @@ export default function 热度窗页() {
                 <td>{r.空窗 ? `零窗(${r.空窗策略快照 || "无快照"})` : "—"}</td>
                 <td>{r.版本}</td>
                 <td className="码">{r.关闭处理时 || "—"}</td>
+                <td className="码">{r.策略戳号 || (r.空窗 ? "无戳!" : "—")}</td>
               </tr>
             ))}
           </tbody>

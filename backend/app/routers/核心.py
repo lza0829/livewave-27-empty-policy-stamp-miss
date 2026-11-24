@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from app.db import 夹具目录, 连接
 from app.modules.空窗发射策略 import 合法策略
-from app.services import 装载, 贯验, 目录, 空窗策略
+from app.services import 装载, 贯验, 目录, 空窗策略, 空窗补扫
 
 路由 = APIRouter(prefix="/api")
 
@@ -85,10 +85,16 @@ def 列热度窗(状态: str = ""):
         if 状态:
             rows = conn.execute(
                 "SELECT * FROM 热度窗 WHERE 状态=? ORDER BY 窗起事件时 DESC", (状态,)
-            )
+            ).fetchall()
         else:
-            rows = conn.execute("SELECT * FROM 热度窗 ORDER BY 窗起事件时 DESC")
-        return [dict(r) for r in rows]
+            rows = conn.execute("SELECT * FROM 热度窗 ORDER BY 窗起事件时 DESC").fetchall()
+        到戳 = 空.窗键到戳号(conn)
+        输出 = []
+        for r in rows:
+            d = dict(r)
+            d["策略戳号"] = 到戳.get(r["窗键"], "")
+            输出.append(d)
+        return 输出
     finally:
         conn.close()
 
@@ -201,6 +207,16 @@ def 取空窗策略戳(区间: str | None = None):
         return 空.查策略戳(conn, 区间)
     finally:
         conn.close()
+
+
+class 补扫请求(BaseModel):
+    房间键: str | None = None
+
+
+@路由.post("/空窗策略/补扫")
+def 空窗补扫接口(体: 补扫请求 | None = None):
+    房间键 = (体.房间键 if 体 else None) or None
+    return 空窗补扫.补扫(房间键)  # 漂移由全局 空窗策略戳错误 handler 转 409
 
 def _alias_payload(payload: dict) -> dict:
     out = dict(payload or {})

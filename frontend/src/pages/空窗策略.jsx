@@ -26,6 +26,17 @@ export default function 空窗策略页() {
     设查果(await 取(`/空窗策略/窗键?窗键=${k}`));
   };
 
+  const 补扫 = async () => {
+    设讯("");
+    try {
+      const r = await 递("/空窗策略/补扫", {});
+      设讯(`补扫完成：新戳 ${r.打戳数} · 冻结校验 ${r.冻结校验} · 核证${r.核证.valid ? "对齐" : "撕裂"}`);
+      await 刷();
+    } catch (e) {
+      设讯(`补扫拒绝（戳漂移，整票回滚）：${String(e.message || e).slice(0, 300)}`);
+    }
+  };
+
   if (!策) return <p className="讯">加载中…</p>;
   return (
     <div>
@@ -55,6 +66,7 @@ export default function 空窗策略页() {
             </button>
           ))}
           <button className="次" onClick={刷}>刷新</button>
+          <button className="水" onClick={补扫}>补扫（吃戳）</button>
         </div>
         {讯 && <div className="提示条">{讯}</div>}
       </div>
@@ -80,6 +92,14 @@ export default function 空窗策略页() {
               <tr><td>空窗行</td><td>{查果.空窗 ? `是，快照=${查果.空窗策略快照}` : "否"}</td></tr>
               <tr><td>窗止已被水位越过</td><td>{查果.窗止已越过 ? "是" : "否"}</td></tr>
               <tr>
+                <td>策略戳</td>
+                <td className="码">
+                  {查果.策略戳
+                    ? `${查果.策略戳.策略码} · ${查果.策略戳.戳号} · 区间 ${查果.策略戳.跨越区间} · 世代 ${查果.策略戳.世代}`
+                    : "无戳（未处置过）"}
+                </td>
+              </tr>
+              <tr>
                 <td>valid</td>
                 <td><span className={`徽章 ${查果.valid ? "通" : "败"}`}>{查果.valid ? "合法" : "撕裂"}</span></td>
               </tr>
@@ -97,6 +117,8 @@ export default function 空窗策略页() {
               <span className={`徽章 ${校.valid ? "通" : "败"}`}>{校.valid ? "对齐" : "撕裂"}</span>
               <span className="讯" style={{ margin: 0 }}>
                 空窗行 {校.空窗行数}（其中切换前历史零窗 {校.其中历史零窗}）· 越过无行缺口 {校.越过无行缺口数}
+                {校.已戳窗键数 != null ? ` · 已戳窗键 ${校.已戳窗键数}` : ""}
+                {校.策略戳核证 ? ` · 策略戳 ${校.策略戳核证.戳数}` : ""}
               </span>
             </div>
             {!!校.问题.length && (

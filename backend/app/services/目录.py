@@ -1,4 +1,5 @@
 from app.db import 连接
+from app.modules import 空窗策略戳 as 空戳
 
 
 def 总览() -> dict:
@@ -10,6 +11,7 @@ def 总览() -> dict:
         末 = conn.execute(
             "SELECT * FROM 窗贯验 ORDER BY 编号 DESC LIMIT 1"
         ).fetchone()
+        戳核 = 空戳.核证(conn)
         return {
             "直播间": c("SELECT COUNT(*) FROM 直播间"),
             "互动事件": c("SELECT COUNT(*) FROM 互动事件"),
@@ -22,6 +24,9 @@ def 总览() -> dict:
             "撤回单": c("SELECT COUNT(*) FROM 撤回单"),
             "旁路匣": c("SELECT COUNT(*) FROM 旁路匣"),
             "装载批次": c("SELECT COUNT(*) FROM 装载批次"),
+            "策略戳数": 戳核["戳数"],
+            "策略戳覆盖窗键": 戳核["窗键覆盖数"],
+            "策略戳核证": 戳核["valid"],
             "末次贯验": dict(末) if 末 else None,
         }
     finally:
